@@ -26,7 +26,7 @@ const app = express()
 
 app.use(express.json())
 app.use(cros({
-    origin: `http://127.0.0.1:5500`,
+    origin: [`http://127.0.0.1:5500`, 'https://frontend-seven-delta-85.vercel.app'],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }))
 
