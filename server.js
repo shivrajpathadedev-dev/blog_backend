@@ -1,5 +1,4 @@
 
-const http = require('http');
 const cros = require('cors')
 const PORT = 4000;
 const blogs = [
@@ -42,13 +41,12 @@ const blogs = [
     }
 ]
 const express = require('express');
-const { measureMemory } = require('vm');
 
 const app = express()
 
 app.use(express.json())
 app.use(cros({
-    origin: [`http://127.0.0.1:5500`,  'https://frontend-seven-delta-85.vercel.app','https://http-blogs.vercel.app'],
+    origin: [`http://127.0.0.1:5500`,  'https://frontend-seven-delta-85.vercel.app','https://blog-backend-bbg2.onrender.com'],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }))
 
