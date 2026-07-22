@@ -71,64 +71,75 @@ app.get('/blogs', (req, res) => {
     }
 })
 
-app.get('/blogs/:id', (req, res) => {
+app.get('/blogs/:userId', (req, res) => {
     try {
-        let blogId = req.params.userId
-        let blog = blogs.find(t => t.userId === blogId)//object | undefined
+        let blogId = req.params.userId;
+
+        let blog = blogs.find(t => t.userId === blogId);
+
         if (!blog) {
             return res.status(404).json({
                 success: false,
                 message: `Blog with id ${blogId} is not found`
-            })
+            });
         }
+
         res.status(200).json({
             success: true,
             data: blog
-        })
-    } catch (error) {
-        res.status(500)({
-            success: false,
-            message: `Error fetch Blogs!!`,
-            error: error.message
-        })
-    }
-})
+        });
 
-//POST API
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: `Error fetching Blog!!`,
+            error: error.message
+        });
+    }
+});
+
+// POST API
 app.post('/blogs', (req, res) => {
     try {
-        let { title, body } = req.body;
-        if (!title || !body) {
+
+        // Get title, body and author from frontend
+        let { title, body, author } = req.body;
+
+        // Validation
+        if (!title || !body || !author) {
             return res.status(400).json({
                 success: false,
-                message: 'Title and body are Required!!!'
-            })
+                message: 'Title, body and author are Required!!!'
+            });
         }
 
+        // Create new blog
         let newBlog = {
             title: title,
             body: body,
+            author: author, // Added author
             userId: Date.now().toString(),
             createdAt: Date.now(),
             updatedAt: null
-        }
-        //Add New Blog In DB
-        blogs.unshift(newBlog)
+        };
+
+        // Add new blog
+        blogs.unshift(newBlog);
 
         res.status(201).json({
             success: true,
             data: newBlog,
             message: `The Blog with id ${newBlog.userId} is created Successfully!!`
-        })
+        });
 
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: `Error fetch Blogs!!`,
+            message: `Error creating Blog!!`,
             error: error.message
-        })
+        });
     }
-})
+});
 
 //Update API
 app.patch('/blogs/:userId', (req, res) => {
