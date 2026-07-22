@@ -51,8 +51,8 @@ app.get('/blogs', (req, res) => {
 
 app.get('/blogs/:id', (req, res) => {
     try {
-        let blogId = req.params.id
-        let blog = blogs.find(t => t.id === blogId)//object | undefined
+        let blogId = req.params.userId
+        let blog = blogs.find(t => t.userId === blogId)//object | undefined
         if (!blog) {
             return res.status(404).json({
                 success: false,
@@ -96,7 +96,7 @@ app.post('/blogs', (req, res) => {
         res.status(201).json({
             success: true,
             data: newBlog,
-            message: `The Blog with id ${newBlog.id} is created Successfully!!`
+            message: `The Blog with id ${newBlog.userId} is created Successfully!!`
         })
 
     } catch (error) {
