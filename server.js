@@ -7,13 +7,35 @@ const blogs = [
         userId: '1',
         title: 'Node.js',
         body: 'Node.js is an open-source, cross-platform JavaScript runtime environment that allows you to run JavaScript code outside the browser. It is built on Google',
+        author:'Shiv',
         createdAt: 212423768,
         updatedAt: null
     },
     {
         userId: '2',
         title: 'Angular',
-        body: 'Angular is an open-source, cross-platform JavaScript runtime environment that allows you to run JavaScript code outside the browser. It is built on Google',
+        body: 'Angular is a front-end framework developed by Google. We use it to build dynamic and single-page web applications.',
+        author:'Rohit',
+        createdAt: 212423768,
+        updatedAt: null
+
+    },
+
+     {
+        userId: '3',
+        title: 'Express.js',
+        body: 'Express.js is a backend framework for Node.js.',
+        author:'Arjun',
+        createdAt: 212423768,
+        updatedAt: null
+
+    },
+
+     {
+        userId: '4',
+        title: 'Mongo.db',
+        body: 'MongoDB stores data in documents, similar to JSON objects.',
+        author:'Gajanan',
         createdAt: 212423768,
         updatedAt: null
 
