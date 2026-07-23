@@ -1,6 +1,6 @@
 
 const cros = require('cors')
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 const blogs = [
     {
         userId: '1',
@@ -45,10 +45,16 @@ const express = require('express');
 const app = express()
 
 app.use(express.json())
-app.use(cros({
-    origin: [`http://127.0.0.1:5500`,  'https://frontend-seven-delta-85.vercel.app','https://blog-backend-bbg2.onrender.com','https://http-blogs.vercel.app','http://localhost:4200'],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
-}))
+app.use(cors({
+  origin: [
+    'http://localhost:4200',
+    'http://127.0.0.1:5500',
+    'https://frontend-seven-delta-85.vercel.app',
+    'https://http-blogs.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 
 //GET API
