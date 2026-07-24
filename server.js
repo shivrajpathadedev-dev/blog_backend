@@ -44,11 +44,11 @@ const express = require('express');
 
 const app = express()
 
-app.use(express.json())
 app.use(cros({
     origin: [`http://127.0.0.1:5500`, 'https://http-blog2.vercel.app', 'https://frontend-seven-delta-85.vercel.app','https://blog-backend-bbg2.onrender.com','https://http-blogs.vercel.app','http://localhost:4200'],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }))
+app.use(express.json())
     
 //GET API
 app.get('/blogs', (req, res) => {
