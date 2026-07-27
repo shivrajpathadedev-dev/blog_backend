@@ -1,11 +1,15 @@
 
-const cros = require('cors')
+const Blog = require('./models/blog.model');
+const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config();
+
 const PORT = 4000;
 const blogs = [
     {
         userId: '1',
         title: 'Node.js',
-        body: 'Node.js is an open-source, cross-platform JavaScript runtime environment that allows you to run JavaScript code outside the browser. It is built on Google',
+        body: 'Node.js is an open-source, corss-platform JavaScript runtime environment that allows you to run JavaScript code outside the browser. It is built on Google',
         author:'Shiv',
         createdAt: 212423768,
         updatedAt: null
@@ -42,37 +46,47 @@ const blogs = [
 ]
 const express = require('express');
 
-const app = express()
+const app = express();
 
-app.use(cros({
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => {
+        console.log('MongoDB Connected Successfully');
+    })
+    .catch((error) => {
+        console.log('MongoDB Connection Error:', error.message);
+    });
+
+app.use(cors({
     origin: [`http://127.0.0.1:5500`, 'https://http-blog2.vercel.app', 'https://frontend-seven-delta-85.vercel.app','https://blog-backend-bbg2.onrender.com','https://http-blogs.vercel.app','http://localhost:4200'],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
 }))
 app.use(express.json())
     
 //GET API
-app.get('/blogs', (req, res) => {
-    //if we have query params q=='rxjs'
-    //page=1 and limit=20
+app.get('/blogs', async (req, res) => {
     try {
+        const blogs = await Blog.find();
+
         res.status(200).json({
             success: true,
             data: blogs
-        })
+        });
+
     } catch (error) {
-        res.status(500)({
+        res.status(500).json({
             success: false,
-            message: `Error fetch Blogs!!`,
+            message: 'Error fetching Blogs!!',
             error: error.message
-        })
+        });
     }
-})
+});
 
-app.get('/blogs/:userId', (req, res) => {
+// GET BLOG BY ID
+app.get('/blogs/:id', async (req, res) => {
     try {
-        let blogId = req.params.userId;
+        const blogId = req.params.id;
 
-        let blog = blogs.find(t => t.userId === blogId);
+        const blog = await Blog.findById(blogId);
 
         if (!blog) {
             return res.status(404).json({
@@ -89,20 +103,18 @@ app.get('/blogs/:userId', (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: `Error fetching Blog!!`,
+            message: 'Error fetching Blog!!',
             error: error.message
         });
     }
 });
 
 // POST API
-app.post('/blogs', (req, res) => {
+// POST API - Save blog in MongoDB
+app.post('/blogs', async (req, res) => {
     try {
+        const { title, body, author } = req.body;
 
-        // Get title, body and author from frontend
-        let { title, body, author } = req.body;
-
-        // Validation
         if (!title || !body || !author) {
             return res.status(400).json({
                 success: false,
@@ -110,104 +122,96 @@ app.post('/blogs', (req, res) => {
             });
         }
 
-        // Create new blog
-        let newBlog = {
-            title: title,
-            body: body,
-            author: author, // Added author
-            userId: Date.now().toString(),
-            createdAt: Date.now(),
-            updatedAt: null
-        };
-
-        // Add new blog
-        blogs.unshift(newBlog);
+        const newBlog = await Blog.create({
+            title,
+            body,
+            author
+        });
 
         res.status(201).json({
             success: true,
             data: newBlog,
-            message: `The Blog with id ${newBlog.userId} is created Successfully!!`
+            message: 'Blog created successfully!!'
         });
 
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: `Error creating Blog!!`,
+            message: 'Error creating Blog!!',
             error: error.message
         });
     }
 });
 
-//Update API
-app.patch('/blogs/:userId', (req, res) => {
-
+// UPDATE BLOG API
+app.patch('/blogs/:id', async (req, res) => {
     try {
-        let blogId = req.params.userId;
-        const getIndex = blogs.findIndex(t => t.userId === blogId)
-        if (getIndex === -1) {
+        const blogId = req.params.id;
+
+        const { title, body, author } = req.body;
+
+        const updatedBlog = await Blog.findByIdAndUpdate(
+            blogId,
+            {
+                ...req.body,
+                updatedAt: Date.now()
+            },
+            {
+                new: true,          // updated data return करेल
+                runValidators: true // schema validation check करेल
+            }
+        );
+
+        if (!updatedBlog) {
             return res.status(404).json({
                 success: false,
-                message: `Blog with id ${blogId} is not found.!`
-            })
+                message: `Blog with id ${blogId} is not found!`
+            });
         }
-        let { title, body } = req.body;
-        if (!title || !body) {
-            return res.status(400).json({
-                success: false,
-                message: 'Title and body are Required!!!'
-            })
-        }
-
-        let updateBlog = {
-            ...blogs[getIndex],
-            ...req.body,
-            updatedAt: Date.now()
-        }
-
-        blogs[getIndex] = updateBlog;
 
         res.status(200).json({
             success: true,
-            message: `The blog with id ${blogId} is updated successfully!!`,
-            data: updateBlog
-        })
+            message: `Blog updated successfully!`,
+            data: updatedBlog
+        });
 
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: `Error fetch Blogs!!`,
+            message: 'Error updating Blog!!',
             error: error.message
-        })
+        });
     }
-})
+});
 
-//Remove API
-app.delete('/blogs/:userId', (req, res) => {
+// DELETE BLOG API
+app.delete('/blogs/:id', async (req, res) => {
     try {
+        const blogId = req.params.id;
 
-        let blogId = req.params.userId;
-        let getIndex = blogs.findIndex(t => t.userId === blogId)
-        if (getIndex == -1) {
-            return res.status(400).json({
+        const deletedBlog = await Blog.findByIdAndDelete(blogId);
+
+        if (!deletedBlog) {
+            return res.status(404).json({
                 success: false,
-                message: `The blog with id ${blogId} is not found!`
-            })
+                message: `Blog with id ${blogId} is not found!`
+            });
         }
-        let blog=blogs.splice(getIndex,1)
+
         res.status(200).json({
-            success:true,
-            message:`The blog with id ${blogId} is remove successfully!`,
-            data:blog
-        })
-  
+            success: true,
+            message: 'Blog deleted successfully!',
+            data: deletedBlog
+        });
+
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: `Error fetch Blogs!!`,
+            message: 'Error deleting Blog!!',
             error: error.message
-        })
+        });
     }
-})
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
